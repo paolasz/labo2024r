@@ -223,20 +223,87 @@ AgregarVariables_IntraMes <- function(dataset) {
   dataset[, r_vm_consumoactual_vs_deuda_fe := vm_mconsumototal / vm_msaldototal ]
   
   
-  #uso las vbles normalizadas ---------- iteracion 2 de adicionales pero normalizandolas
-  #activo
+  #-----------------------
+  # Varables adicionales 2
+  #-----------------------
+  # uso las vbles normalizadas  
+  # activo
   dataset[, mactivo_norm_fe := rowSums(cbind(mcuentas_saldo_normalizado, mplazo_fijo_dolares, mplazo_fijo_pesos, minversion1_pesos, minversion1_dolares, minversion2), na.rm = TRUE)]
   
-  #patrimonio neto
+  # patrimonio neto
   dataset[, mpatrimonio_neto_norm_fe := rowSums(cbind(mactivo_norm_fe , (-1) * mpasivo_fe), na.rm = TRUE)]
-  #apalancamiento o leverage financiero
+  # apalancamiento o leverage financiero
   dataset[, r_apalancamiento_norm_fe :=  mpasivo_fe/mactivo_norm_fe ]
   
   # ratio saldo vs salario estimado
   dataset[, r_saldo_vs_salario_norm_fe :=  mcuentas_saldo_normalizado/salario_estimado_fe ]
   
-  #activo vs edad
+  # activo vs edad
   dataset[, r_activo_norm_vs_edad_fe :=  mactivo_norm_fe /cliente_edad]
+  
+  
+  # prestamos vs pasivo
+  dataset[, r_prestamos_vs_pasivo_fe := mtotal_prestamos_fe / mpasivo_fe]
+  # deuda tarjeta vs pasivo
+  dataset[, r_saldo_tarjeta_vs_pasivo_fe := vm_msaldototal / mpasivo_fe]
+  
+  # inversiones vs salario
+  dataset[, r_inversiones_vs_salario_fe := mtotal_inversiones_fe / salario_estimado_fe]
+  # inversiones vs activo
+  dataset[, r_inversiones_vs_activo_fe :=  mtotal_inversiones_fe/mactivo_fe ]
+  dataset[, r_inversiones_vs_activo_norm_fe :=  mtotal_inversiones_fe/mactivo_norm_fe ]
+  
+  # saldo promedio de las cuentas 
+  dataset[, mprom_cuentas_fe :=  mcuentas_saldo/(ccuenta_corriente + ccaja_ahorro) ]
+  dataset[, mprom_cuentas_norm_fe :=  mcuentas_saldo_normalizado/(ccuenta_corriente + ccaja_ahorro) ]
+  
+  # monto consumido con tarjeta vs edad
+  dataset[, r_limite_compra_vs_edad_fe :=  vm_mlimitecompra /cliente_edad]
+  dataset[, r_mtarjea_vs_edad_fe := (mautoservicio + mtarjeta_visa_consumo + mtarjeta_master_consumo + mcuenta_debitos_automaticos)/cliente_edad ]
+  
+  # promedio de transacciones por cant de tarjetas
+  dataset[, cprom_trx_por_tarjeta_edad_fe :=  (ctarjeta_visa_transacciones + ctarjeta_master_transacciones) /(ctarjeta_visa + ctarjeta_master)]
+  
+  # cheques rechazados
+  dataset[, prop_cchq_emitido_rechazado_fe := ccheques_emitidos_rechazados/ ccheques_emitidos]
+  dataset[, prop_cchq_deposit_rechazado_fe := ccheques_depositados_rechazados/ ccheques_depositados]
+  
+  dataset[, prop_mchq_emitido_rechazado_fe := mcheques_emitidos_rechazados/ mcheques_emitidos]
+  dataset[, prop_mchq_deposit_rechazado_fe := mcheques_depositados_rechazados/ mcheques_depositados]
+  
+  #transacciones por otros servicios
+  # cajeros
+  dataset[, prop_ctrx_other_atm_fe := catm_trx_other / (catm_trx_other+ catm_trx) ]
+  dataset[, prop_ctrx_atm_fe := catm_trx / (catm_trx_other+ catm_trx) ]
+  dataset[, prop_mtrx_other_atm_fe := matm_other / (matm_other+ matm) ]
+  dataset[, prop_mtrx_atm_fe := matm / (matm_other+ matm) ]
+  #movimiento que se tiene en el banco usando los servicios que provee
+  dataset[, ctotal_trx_servicios_con_banco_fe := rowSums(cbind(cmobile_app_trx, catm_trx,	ccajas_otras,ccajas_extracciones,ccajas_depositos, ccajas_consultas,ccajas_transacciones,chomebanking_transacciones,ccallcenter_transacciones, ccheques_emitidos,ccheques_depositados,cextraccion_autoservicio,ctransferencias_emitidas,ctransferencias_recibidas,cforex,cpagomiscuentas,cpagodeservicios), na.rm = TRUE)]
+  dataset[, prom_trx_servicios_con_banco_fe := ctotal_trx_servicios_con_banco_fe/ 17]
+  dataset[, r_salario_vs_trx_servicios_con_banco_fe := salario_estimado_fe / ctotal_trx_servicios_con_banco_fe]
+  
+  #transacciones productos
+  dataset[, cctrx_productos_fe := rowSums(cbind(ccuenta_corriente, ccaja_ahorro, ctarjeta_debito, ctarjeta_visa, ctarjeta_master, cprestamos_personales, cprestamos_prendarios, cprestamos_hipotecarios, cplazo_fijo, cinversion1, cinversion2, cseguro_vida, cseguro_auto, cseguro_vivienda, cseguro_accidentes_personales, ccaja_seguridad), na.rm = TRUE)]
+  dataset[, prom_cctrx_productos_fe := cctrx_productos_fe/ 16]
+  dataset[, r_salario_vs_ctrx_fe:= salario_estimado_fe / prom_cctrx_productos_fe]
+  
+  #salario vs total de transacciones trimestre
+  dataset[, r_salario_vs_cctx_quarter_fe:= (salario_estimado_fe *3)  / ctrx_quarter_normalizado]
+  
+  # RENTABILIDAD
+  dataset[, mtotalRentab_banco_fe := rowSums(cbind(mrentabilidad, mcomisiones,	mactivos_margen,mpasivos_margen), na.rm = TRUE)]
+  dataset[, r_totalRentab_vs_activo_fe := mtotalRentab_banco_fe / mactivo_fe]
+  dataset[, r_totalRentab_vs_pasivo_fe := mtotalRentab_banco_fe / mpasivo_fe]
+  dataset[, r_totalRentab_vs_salario_fe := mtotalRentab_banco_fe / salario_estimado_fe]
+  
+  dataset[, r_Rentabanual_vs_activo_fe := mrentabilidad_annual / mactivo_fe]
+  dataset[, r_Rentabanual_vs_pasivo_fe := mrentabilidad_annual / mpasivo_fe]
+  dataset[, r_Rentabanual_vs_salario_fe := mrentabilidad_annual / salario_estimado_fe]
+  
+  dataset[, r_rentab_vs_cctx_quarter_fe := (mtotalRentab_banco_fe * 3)  / ctrx_quarter_normalizado]
+  dataset[, prom_rentab_quarter_fe := mrentabilidad_annual / 4]
+  dataset[, rentab_anual_vs_cctx_norm_fe := mrentabilidad_annual / (ctrx_quarter_normalizado * 4)]
+  
   
   # valvula de seguridad para evitar valores infinitos
   # paso los infinitos a NULOS
