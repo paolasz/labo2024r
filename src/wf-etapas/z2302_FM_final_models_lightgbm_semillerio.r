@@ -89,7 +89,7 @@ vganancias_suavizadas <- c()
 
 
 if( file.exists( "tb_modelos.txt" ) ){
-  tb_modelos <- fread( tb_modelos )
+  tb_modelos <- fread( "tb_modelos.txt" )
 } else {
   tb_modelos <- data.table( 
     rank= integer(),
