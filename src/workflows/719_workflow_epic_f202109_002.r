@@ -162,7 +162,10 @@ FEhist_base <- function( pinputexps)
   param_local$Tendencias2$promedio <- FALSE
   param_local$Tendencias2$ratioavg <- FALSE
   param_local$Tendencias2$ratiomax <- FALSE
-
+  param_local$Tendencias2$ema <- FALSE
+  param_local$Tendencias2$bbwp <- FALSE
+  param_local$Tendencias2$bbwp_ventana <- 5
+  
   param_local$semilla <- NULL # no usa semilla, es deterministico
 
   return( exp_correr_script( param_local ) ) # linea fija
