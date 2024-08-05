@@ -8,6 +8,7 @@
    src/wf-etapas incluye los scripts de todas las etapas involucradas.
 
    Consideraciones adicionales:
+   
      Semillas: 
         297391
         200513
